@@ -1,0 +1,120 @@
+# Laravel Application Deployment Documentation
+
+## Prerequisites
+Ensure your Ubuntu server is up-to-date:
+```sh
+sudo apt update && sudo apt upgrade -y
+```
+
+## Install Required Packages
+```sh
+sudo apt install -y apache2 unzip curl git php php-cli php-mbstring php-xml php-bcmath php-curl php-zip php-tokenizer php-mysql composer mysql-client
+```
+
+## Verify Installations
+```sh
+php --version
+mysql --version
+```
+
+## Install and Configure MySQL Database
+```sh
+sudo apt install -y mysql-server
+sudo mysql_secure_installation
+```
+
+### Create Database and User
+```sh
+sudo mysql -u root -p
+CREATE DATABASE laravel_db;
+CREATE USER 'laravel_user'@'%' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON laravel_db.* TO 'laravel_user'@'%';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+## Install Composer
+```sh
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+composer -V
+```
+
+## Clone Laravel Application
+```sh
+cd /var/www/
+sudo git clone https://github.com/bradtraversy/laragigs.git
+cd laragigs/
+```
+
+## Install Dependencies
+```sh
+sudo composer install --no-dev --optimize-autoloader
+```
+
+## Set Permissions
+```sh
+sudo chown -R www-data:www-data /var/www/laragigs/
+sudo chmod -R 775 /var/www/laragigs/storage /var/www/laragigs/bootstrap/cache
+```
+
+## Configure Laravel Environment
+```sh
+sudo cp .env.example .env
+sudo vim .env  # Edit database credentials
+```
+
+## Generate Application Key
+```sh
+sudo php artisan key:generate
+```
+
+## Run Database Migrations
+```sh
+php artisan migrate --force
+```
+
+## Set Storage Link
+```sh
+sudo php artisan storage:link
+```
+
+## Configure Apache Web Server
+Create a new Apache configuration file:
+```sh
+sudo nano /etc/apache2/sites-available/laravel.conf
+```
+
+### Apache Configuration File
+```
+<VirtualHost *:80>
+    ServerAdmin admin@yourdomain.com
+    DocumentRoot /var/www/laragigs/public
+    ServerName 44.206.231.26
+    ServerAlias www.yourdomain.com
+
+    <Directory /var/www/laragigs>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+## Enable Apache Configuration and Restart
+```sh
+sudo a2enmod rewrite
+sudo a2ensite laravel.conf
+sudo systemctl restart apache2
+```
+
+## Verify Deployment
+Access your Laravel application via the server's public IP or configured domain name:
+```
+http://44.206.231.26
+```
+
+Your Laravel application should now be running successfully on Apache.
