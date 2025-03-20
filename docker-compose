@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  laravel-app:
+    build: .
+    container_name: laravel-apache
+    restart: unless-stopped
+    ports:
+      - "8080:80" # Expose Apache on port 8080
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY}
+      DB_CONNECTION: mysql
+      DB_HOST: ${DB_HOST} # Use the external MySQL server
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - .:/var/www/html
+    networks:
+      - laravel_network
+
+networks:
+  laravel_network:
+    driver: bridge
